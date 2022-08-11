@@ -70,6 +70,10 @@ def create_dataframe():
     return df
 
 def write_to_csv(df, chunks):
+    ''' Creates output folder in current path, 
+        Checks if output folder exists before creating
+        Will then check if file needs to be split
+        Then will output file into CSV'''    
     existingPath = os.getcwd()
     newPath = os.getcwd() + '\output'
     try:
