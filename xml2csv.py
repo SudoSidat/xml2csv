@@ -43,7 +43,7 @@ def add_values_in_dict(dict, key, list_of_values):
 
 def create_dataframe():
     ''' Creates dataframe using Pandas, 
-        created using the dictionary of lists'''
+        Created using the dictionary of lists'''
     df = pd.DataFrame(data=diction)
     df.fillna("",inplace=True)
     print('Finished loading dictionary into dataframe')
