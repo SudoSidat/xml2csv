@@ -2,20 +2,23 @@ import lxml.etree as ET
 import pandas as pd
 import numpy as np
 import time
+import sys
+import os
 
 start_time = time.time()
 diction = {}
+file_name = sys.argv[1]
 
 def main():
     xmlTreeRoot = create_xml_tree()
     iterate_XML_2_dict(xmlTreeRoot)
     dataFrame = create_dataframe()
-    output_csv(dataFrame)
+    write_to_csv(dataFrame)
 
 def create_xml_tree():
     ''' Creates XML tree ready to parse '''
     print('Creating XML tree')
-    tree = ET.parse('test.xml')
+    tree = ET.parse(file_name)
     root = tree.getroot()
     print('XML tree created')
     return root
@@ -50,9 +53,23 @@ def create_dataframe():
     print("--- %s seconds ---" % (time.time() - start_time))#
     return df
 
-def output_csv(df):
+def write_to_csv(df):
+    existingPath = os.getcwd()
+    newPath = os.getcwd() + '\output'
+    try:
+        os.mkdir(newPath)
+    except OSError:
+        print ("Successfully saved in directory: %s " % newPath)
+    else:
+        print ("Successfully created the directory %s " % newPath)
+    os.chdir(newPath)
     #for idx, chunk in enumerate(np.array_split(df, 2)):
         #chunk.to_csv(f'output{idx}.csv')
+    df.to_csv(os.path.basename(file_name) + '.csv',index = False,na_rep='')
+    print(str(time.process_time()) + ' seconds taken to convert.')
+    os.chdir(existingPath)
+
+def output_csv(df):
     df.to_csv("output.csv",na_rep='', index=False)
     print("Total time taken: " + "--- %s seconds ---" % (time.time() - start_time))
 
