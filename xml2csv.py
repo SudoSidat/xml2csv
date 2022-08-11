@@ -10,10 +10,26 @@ diction = {}
 file_name = sys.argv[1]
 
 def main():
+    chunk_size = check_file_size(file_name)
     xmlTreeRoot = create_xml_tree()
     iterate_XML_2_dict(xmlTreeRoot)
     dataFrame = create_dataframe()
-    write_to_csv(dataFrame)
+    write_to_csv(dataFrame,chunk_size)
+
+def check_file_size(file_name):
+    file_size = os.path.getsize(file_name)/(1024*1024)
+    print(f"File size: {file_size:.2f}MB")
+    if file_size > 500:
+        while True:
+            try:
+                chunks = int(input("Please enter number of how many files you want this file split into (e.g 2): "))
+            except ValueError:
+                print('***Please enter a valid integer***')
+                continue
+            break      
+    else:
+        chunks = 1
+    return chunks
 
 def create_xml_tree():
     ''' Creates XML tree ready to parse '''
@@ -26,7 +42,7 @@ def create_xml_tree():
 def iterate_XML_2_dict(root):
     ''' Iterate through child object 
         and add tag and text to dictionary '''    
-    print ('Start adding values from XML > Dictionary')
+    print ('Adding values from XML > Dictionary')
     for child in root:
         for innerC in child:
             add_values_in_dict(diction, str(innerC.tag), str(innerC.text))
@@ -53,7 +69,7 @@ def create_dataframe():
     print("--- %s seconds ---" % (time.time() - start_time))#
     return df
 
-def write_to_csv(df):
+def write_to_csv(df, chunks):
     existingPath = os.getcwd()
     newPath = os.getcwd() + '\output'
     try:
@@ -63,9 +79,12 @@ def write_to_csv(df):
     else:
         print ("Successfully created the directory %s " % newPath)
     os.chdir(newPath)
-    #for idx, chunk in enumerate(np.array_split(df, 2)):
-        #chunk.to_csv(f'output{idx}.csv')
-    df.to_csv(os.path.basename(file_name) + '.csv',index = False,na_rep='')
+    #df.to_csv(os.path.basename(file_name) + '.csv',index = False,na_rep='')
+    for idx, chunk in enumerate(np.array_split(df, chunks)):
+        if chunks > 1:
+            chunk.to_csv(f'{idx}' + os.path.basename(file_name) + '.csv', index=False)
+        else:
+            chunk.to_csv(os.path.basename(file_name) + '.csv', index=False)
     print(str(time.process_time()) + ' seconds taken to convert.')
     os.chdir(existingPath)
 
